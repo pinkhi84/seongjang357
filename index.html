@@ -204,7 +204,7 @@
   .pipe { position:absolute; left:55%; right:9%; bottom:7.5%; height:9%; border:2px solid #8c6a2c; background:linear-gradient(#fff3c8,#e0b14e 50%,#a67c2a); border-radius:20px; z-index:1; box-shadow:0 2px 4px rgba(0,0,0,.25); overflow:hidden; }
   .pipe::after { content:"▶ ▶ ▶ ▶ ▶ ▶ ▶ ▶"; position:absolute; top:50%; left:-40px; transform:translateY(-50%); font-size:11px; font-weight:900; letter-spacing:2px; color:#c72d27; white-space:nowrap; animation:flow 1.2s linear infinite; text-shadow:0 0 2px #fff; }
   @keyframes flow { from{transform:translate(0,-50%)} to{transform:translate(20px,-50%)} }
-  .nameplate { position:relative; z-index:3; margin:7% auto 0; width:max-content; max-width:112%; text-align:center; background:linear-gradient(#fff8e3,#fbe7b0); border:3px solid #c99a3c; border-radius:14px; padding:7px 13px 8px; left:-4%; box-shadow:0 5px 12px rgba(40,30,0,.28); }
+  .nameplate { position:relative; z-index:3; margin:7% auto 0; width:max-content; max-width:125%; text-align:center; background:linear-gradient(#fff8e3,#fbe7b0); border:3px solid #c99a3c; border-radius:14px; padding:7px 13px 8px; left:-4%; box-shadow:0 5px 12px rgba(40,30,0,.28); }
   .nameplate b { font-family:"Noto Sans KR","Pretendard",sans-serif; display:block; font-size:17.5px; font-weight:600; color:#5a3d06; letter-spacing:-.2px; white-space:nowrap; }
   .nameplate span { font-family:"Noto Sans KR","Pretendard",sans-serif; display:block; font-size:13px; font-weight:500; color:#b2302c; white-space:nowrap; margin-top:1px; }
   .slotHint { position:absolute; left:50%; top:-15%; transform:translateX(-50%); font-size:13px; font-weight:900; color:#1f6b45; background:#fff; padding:2px 8px; border-radius:10px; white-space:nowrap; animation:bob 1.2s ease-in-out infinite; box-shadow:0 2px 6px rgba(0,0,0,.15); }
@@ -666,11 +666,18 @@ function fitBubble(){ const b=$("bubble"); if(!b||b.offsetParent===null) return;
   const over=()=>[...b.querySelectorAll(".nw")].some(x=>x.offsetWidth>b.clientWidth-26);
   while(f>14 && over()){ f-=0.5; b.style.fontSize=f+"px"; } }
 function fitText(el,max,min,pad){ if(!el||el.offsetParent===null) return; let f=max; el.style.fontSize=f+"px";
-  const box=el.parentElement, room=()=>box.clientWidth-pad;
-  while(f>min && el.scrollWidth>room()){ f-=0.25; el.style.fontSize=f+"px"; } }
+  const box=el.parentElement, room=box.clientWidth-pad; el.style.width="max-content";
+  while(f>min && el.getBoundingClientRect().width>room){ f-=0.25; el.style.fontSize=f+"px"; }
+  el.style.width=""; }
 function fitPhone(){ const c=document.querySelector(".frame .cap"); if(c){ c.style.display="block"; fitText(c,12.6,8,12); const sm=c.querySelector("small"); if(sm) sm.style.fontSize=Math.min(11.5,parseFloat(c.style.fontSize)*0.92)+"px"; }
   const np=document.querySelector(".nameplate"), b=np&&np.querySelector("b");
-  if(b){ b.style.fontSize="17.5px"; const lim=np.parentElement.clientWidth*1.12-32; let f=17.5; while(f>11 && b.scrollWidth>lim-6){ f-=0.25; b.style.fontSize=f+"px"; } } }
+  if(b){ b.style.fontSize="17.5px"; const lim=np.parentElement.clientWidth*1.25-32; let f=17.5; while(f>11 && b.scrollWidth>lim-6){ f-=0.25; b.style.fontSize=f+"px"; } }
+  const pt=document.querySelector(".ptag"); if(pt&&np&&b){ np.style.transform=""; pt.style.fontSize=""; const ps=pt.querySelector("small"); if(ps) ps.style.fontSize="";
+    const gap=()=>np.getBoundingClientRect().left-pt.getBoundingClientRect().right-6;
+    const sc=document.querySelector(".scene").getBoundingClientRect();
+    if(gap()<0){ const room=sc.right-8-np.getBoundingClientRect().right; np.style.transform="translateX("+Math.max(0,Math.min(-gap(),room,28))+"px)"; }
+    let pf=13; while(gap()<0 && pf>11){ pf-=0.25; pt.style.fontSize=pf+"px"; if(ps) ps.style.fontSize=(pf-1.5)+"px"; }
+    let f=parseFloat(b.style.fontSize); while(gap()<0 && f>11){ f-=0.25; b.style.fontSize=f+"px"; } } }
 window.addEventListener("resize",fitPhone); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitPhone); setTimeout(fitPhone,50); setTimeout(fitPhone,1500);
 window.addEventListener("resize",fitBubble); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitBubble); setTimeout(fitBubble,50); setTimeout(fitBubble,1500);
 syncServer(); setInterval(()=>{ if(!document.hidden && !demoSnap && !locked) syncServer(); },10000);
